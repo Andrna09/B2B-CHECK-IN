@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>Sociolla Warehouse</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              serif: ['Playfair Display', 'serif'],
+            },
+            colors: {
+              sociolla: {
+                base: '#FDF2F4',    // Very Light Blush Pink (Body BG)
+                pink: '#F4A8B6',    // Soft Pink (Secondary/Border)
+                accent: '#D46A83',  // Rose Gold (Primary Action)
+                dark: '#2D2D2D',    // Charcoal Grey (Text)
+                gold: '#C69C6D',    // Luxury Accent
+              },
+              // Mapping standard tailwind colors to brand palette where appropriate for existing components
+              pink: {
+                50: '#FDF2F4',
+                100: '#FCE7F3',
+                200: '#FBCFE8',
+                300: '#F9A8D4',
+                400: '#F472B6',
+                500: '#D46A83', // Brand Accent
+                600: '#DB2777',
+              }
+            },
+            animation: {
+              'float': 'float 6s ease-in-out infinite',
+              'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+              'zoom-in': 'zoomIn 0.3s ease-out forwards',
+              'blob': 'blob 7s infinite'
+            },
+            keyframes: {
+              float: {
+                '0%, 100%': { transform: 'translateY(0)' },
+                '50%': { transform: 'translateY(-20px)' }
+              },
+              fadeInUp: {
+                '0%': { opacity: '0', transform: 'translateY(20px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' }
+              },
+              zoomIn: {
+                '0%': { opacity: '0', transform: 'scale(0.95)' },
+                '100%': { opacity: '1', transform: 'scale(1)' }
+              },
+              blob: {
+                '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                '100%': { transform: 'translate(0px, 0px) scale(1)' }
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #FDF2F4;
+        color: #2D2D2D;
+        overflow-x: hidden;
+      }
+      
+      .glass {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+      }
+
+      /* Scrollbar Styling */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #FDF2F4; 
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #F4A8B6; 
+        border-radius: 10px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #D46A83; 
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "recharts": "https://esm.sh/recharts@^2.15.0",
+    "react/": "https://esm.sh/react@^18.2.0/",
+    "react": "https://esm.sh/react@^18.2.0",
+    "lucide-react": "https://esm.sh/lucide-react@^0.263.1",
+    "react-dom/": "https://esm.sh/react-dom@^18.2.0/",
+    "qrcode.react": "https://esm.sh/qrcode.react@^3.1.0",
+    "googleapis": "https://esm.sh/googleapis@^126.0.0",
+    "@vercel/node": "https://esm.sh/@vercel/node@^2.15.9",
+    "buffer": "https://esm.sh/buffer@^6.0.3",
+    "stream": "https://esm.sh/stream@^0.0.3",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.39.0",
+    "html2canvas": "https://esm.sh/html2canvas@^1.4.1",
+    "lottie-react": "https://esm.sh/lottie-react@^2.4.0",
+    "@rive-app/react-canvas": "https://esm.sh/@rive-app/react-canvas@4.17.6",
+    "@rive-app/canvas": "https://esm.sh/@rive-app/canvas@2.24.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="antialiased selection:bg-sociolla-pink selection:text-white">
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
