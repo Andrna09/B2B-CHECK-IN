@@ -1,30 +1,34 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { Download, Share2, CheckCircle, Truck, Calendar, Clock, MapPin, Loader2 } from 'lucide-react';
+import { Download, Loader2, CheckCircle, Clock, Calendar, MapPin } from 'lucide-react';
 import { DriverData } from '../types';
 import html2canvas from 'html2canvas';
 
 interface Props {
   data: DriverData;
   onClose: () => void;
+  autoDownload?: boolean; // <--- PROPS BARU
 }
 
-const TicketPass: React.FC<Props> = ({ data, onClose }) => {
+const TicketPass: React.FC<Props> = ({ data, onClose, autoDownload = false }) => {
   const ticketRef = useRef<HTMLDivElement>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string>(""); // <--- STATE PESAN
 
+  // --- LOGIKA DOWNLOAD UTAMA ---
   const handleDownload = async () => {
     if (!ticketRef.current) return;
     setIsGenerating(true);
+    setStatusMessage("Menyiapkan desain tiket...");
 
     try {
-      // Tunggu render font dan style
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Tunggu 1.5 detik agar render font & gambar sempurna
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
       const canvas = await html2canvas(ticketRef.current, {
-        scale: 2, // High resolution
+        scale: 2, // Kualitas HD
         backgroundColor: null,
-        useCORS: true,
+        useCORS: true, // WAJIB: Agar gambar profil Google tidak bikin error
         logging: false
       });
 
@@ -33,20 +37,48 @@ const TicketPass: React.FC<Props> = ({ data, onClose }) => {
       link.href = image;
       link.download = `Sociolla_Pass_${data.bookingCode || 'TICKET'}.png`;
       document.body.appendChild(link);
-      link.click();
+      
+      link.click(); // TRIGGER DOWNLOAD OTOMATIS
+      
       document.body.removeChild(link);
+      setStatusMessage("Berhasil disimpan di Galeri!"); 
+      
+      // Bersihkan pesan sukses setelah 3 detik
+      setTimeout(() => setStatusMessage(""), 3000);
+
     } catch (err) {
       console.error("Gagal generate tiket", err);
-      alert("Gagal mengunduh tiket. Silakan screenshot manual.");
+      setStatusMessage("Gagal otomatis. Silakan klik tombol manual.");
     } finally {
       setIsGenerating(false);
     }
   };
 
+  // --- EFFECT: PEMICU OTOMATIS ---
+  useEffect(() => {
+    if (autoDownload) {
+        // Beri jeda sedikit saat halaman baru terbuka
+        const timer = setTimeout(() => {
+            handleDownload();
+        }, 1000);
+        return () => clearTimeout(timer);
+    }
+  }, [autoDownload]);
+
   return (
-    <div className="flex flex-col items-center justify-center w-full animate-fade-in-up">
+    <div className="flex flex-col items-center justify-center w-full animate-fade-in-up relative">
       
-      {/* --- THE TICKET (Area to capture) --- */}
+      {/* --- NOTIFIKASI MENGAMBANG (TOAST) --- */}
+      {statusMessage && (
+          <div className="fixed top-24 z-[100] bg-slate-900/90 text-white px-6 py-3 rounded-full shadow-2xl animate-bounce border border-slate-700 backdrop-blur-md">
+              <p className="text-sm font-bold flex items-center gap-2">
+                 {isGenerating ? <Loader2 className="animate-spin w-4 h-4 text-blue-400"/> : <CheckCircle className="w-4 h-4 text-emerald-400"/>}
+                 {statusMessage}
+              </p>
+          </div>
+      )}
+
+      {/* --- AREA TIKET (DESAIN ASLI ANDA) --- */}
       <div className="relative p-4 w-full max-w-[380px]">
         <div 
           ref={ticketRef} 
@@ -60,7 +92,13 @@ const TicketPass: React.FC<Props> = ({ data, onClose }) => {
                 <div className="flex justify-between items-center relative z-10 mb-6">
                     <div className="flex items-center gap-2">
                         <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center p-1">
-                             <img src="https://play-lh.googleusercontent.com/J0NYr2cNJmhQiGbDXJHOqa4o9WhPeqC4BGuaD-YKp28KxH1xoW83A3dJyQMsaNwpx0Pv" className="w-full h-full object-cover rounded"/>
+                             {/* PERBAIKAN PENTING: TAMBAH crossOrigin="anonymous" */}
+                             <img 
+                                src="https://play-lh.googleusercontent.com/J0NYr2cNJmhQiGbDXJHOqa4o9WhPeqC4BGuaD-YKp28KxH1xoW83A3dJyQMsaNwpx0Pv" 
+                                className="w-full h-full object-cover rounded"
+                                crossOrigin="anonymous" 
+                                alt="Profile"
+                             />
                         </div>
                         <div>
                             <h3 className="font-serif font-bold text-lg leading-none">sociolla</h3>
@@ -74,7 +112,7 @@ const TicketPass: React.FC<Props> = ({ data, onClose }) => {
                     </div>
                 </div>
 
-                {/* Main Plate Number (Airport Gate Style) */}
+                {/* Main Plate Number */}
                 <div className="text-center relative z-10 mb-2">
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] mb-1">LICENSE PLATE</p>
                     <h1 className="text-5xl font-black tracking-tighter text-white">{data.licensePlate}</h1>
@@ -83,7 +121,7 @@ const TicketPass: React.FC<Props> = ({ data, onClose }) => {
 
             {/* Middle Section (Details) */}
             <div className="bg-white p-6 relative">
-                 {/* Cutout Circles for "Ticket" effect */}
+                 {/* Cutout Circles */}
                 <div className="absolute -left-4 top-[-16px] w-8 h-8 bg-[#FDF2F4] rounded-full"></div>
                 <div className="absolute -right-4 top-[-16px] w-8 h-8 bg-[#FDF2F4] rounded-full"></div>
                 
@@ -118,7 +156,6 @@ const TicketPass: React.FC<Props> = ({ data, onClose }) => {
                     <div className="p-3 bg-white border-4 border-[#FDF2F4] rounded-2xl shadow-sm">
                         <QRCodeSVG value={data.bookingCode} size={160} />
                     </div>
-                    {/* UPDATED: Ukuran font dikecilkan agar muat satu baris */}
                     <p className="mt-4 font-mono font-bold text-lg sm:text-xl tracking-widest text-slate-700 text-center break-all">
                         {data.bookingCode}
                     </p>
@@ -126,7 +163,7 @@ const TicketPass: React.FC<Props> = ({ data, onClose }) => {
                 </div>
             </div>
 
-            {/* Bottom Section (Security & Terms) */}
+            {/* Bottom Section */}
             <div className="bg-[#FDF2F4] p-4 border-t border-dashed border-slate-200">
                 <div className="flex items-start gap-3 opacity-70">
                     <MapPin className="w-4 h-4 text-[#D46A83] shrink-0 mt-0.5" />
@@ -139,15 +176,18 @@ const TicketPass: React.FC<Props> = ({ data, onClose }) => {
         </div>
       </div>
 
-      {/* --- ACTION BUTTONS (Outside capture area) --- */}
+      {/* --- ACTION BUTTONS (Tetap Ada sebagai Backup) --- */}
       <div className="w-full max-w-sm px-4 space-y-3 mt-4 mb-10">
           <button 
             onClick={handleDownload}
             disabled={isGenerating}
-            className="w-full py-4 bg-[#D46A83] text-white font-bold rounded-2xl shadow-xl shadow-pink-200 hover:bg-[#c0566e] transition-all hover:scale-[1.02] flex items-center justify-center gap-2"
+            className={`w-full py-4 font-bold rounded-2xl shadow-xl flex items-center justify-center gap-2 transition-all
+              ${isGenerating 
+                ? 'bg-slate-100 text-slate-400 cursor-wait' 
+                : 'bg-[#D46A83] text-white hover:bg-[#c0566e] hover:scale-[1.02] shadow-pink-200'}`}
           >
               {isGenerating ? <Loader2 className="w-5 h-5 animate-spin"/> : <Download className="w-5 h-5"/>}
-              {isGenerating ? 'Memproses Tiket...' : 'SIMPAN TIKET (GAMBAR)'}
+              {isGenerating ? 'Memproses...' : 'SIMPAN TIKET (GAMBAR)'}
           </button>
           
           <button 
@@ -156,10 +196,6 @@ const TicketPass: React.FC<Props> = ({ data, onClose }) => {
           >
               Tutup & Kembali
           </button>
-          
-          <p className="text-center text-xs text-slate-400 px-6">
-              *Simpan gambar ini di HP Anda. Sinyal mungkin hilang di dalam area gudang.
-          </p>
       </div>
 
     </div>
